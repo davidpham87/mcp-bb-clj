@@ -1,0 +1,9 @@
+{:paths ["src"]
+ :tasks {:test {:main "mcp-bb-clj.core-test"
+                :requires ([babashka.classpath :as cp]
+                           [babashka.fs :as fs]
+                           [babashka.tasks :as tasks])
+                :proc (->> (fs/glob "test" "**/*_test.clj")
+                           (map str)
+                           (clojure.string/join " ")
+                           (tasks/shell "clojure -M:test -m babashka.test-runner"))}}}
