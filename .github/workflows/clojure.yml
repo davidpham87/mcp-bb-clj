@@ -23,3 +23,8 @@ jobs:
  
       - name: Run tests
         run: bb :test
+
+      - name: Summary
+        run: |
+          echo "Starting fast Clojure execution..."
+          bb -f action_summary.clj
