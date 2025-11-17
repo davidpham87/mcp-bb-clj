@@ -1,4 +1,4 @@
-{:deps {com.github.davidpham87/mcp-bb-clj {:local/root :"."}}
+{:deps {com.github.davidpham87/mcp-bb-clj {:local/root "."}}
  :paths ["src"]
  :tasks {run-test {:extra-paths ["test"]
                 :extra-deps {io.github.cognitect-labs/test-runner
