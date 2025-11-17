@@ -29,7 +29,7 @@
                  :required ["schema"]}
    :implementation (fn [{:keys [schema]}]
                      (try
-                       (let [sample (m/generate schema)]
+                       (let [sample (mg/generate schema)]
                          {:content [{:type "text"
                                      :text (str "Generated sample: " sample)}]
                           :structuredContent {:sample sample}})
