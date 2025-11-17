@@ -4,7 +4,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; JSON-RPC 2.0 specs
 
-(def AnyObject [:mapof :any :any])
+(def AnyObject [:map-of :any :any])
 
 (def JSONRPC
   [:map
