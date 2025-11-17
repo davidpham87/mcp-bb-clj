@@ -4,6 +4,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; JSON-RPC 2.0 specs
 
+(def AnyObject [:mapof :any :any])
+
 (def JSONRPC
   [:map
    [:jsonrpc [:= "2.0"]]])
@@ -13,13 +15,13 @@
    [:map
     [:id [:or :string :int]]
     [:method :string]
-    [:params {:optional true} :map]]])
+    [:params {:optional true} AnyObject]]])
 
 (def Notification
   [:merge JSONRPC
    [:map
     [:method :string]
-    [:params {:optional true} :map]]])
+    [:params {:optional true} :any]]])
 
 (def Response
   [:merge JSONRPC
@@ -31,7 +33,7 @@
   [:merge JSONRPC
    [:map
     [:id [:or :string :int]]
-    [:error :map]]])
+    [:error :any]]])
 
 (def Message
   [:or Request Notification Response ErrorResponse])
@@ -81,7 +83,7 @@
 (def EmbeddedResource
   [:map
    [:type [:= "resource"]]
-   [:resource [:or :map]]
+   [:resource [:or :any]]
    [:annotations {:optional true} Annotations]])
 
 (def ContentBlock

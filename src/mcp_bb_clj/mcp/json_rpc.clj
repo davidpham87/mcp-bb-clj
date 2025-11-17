@@ -36,7 +36,7 @@
   "Parses a JSON string and validates it as a JSON-RPC message."
   [json-string]
   (let [data (json/read-str json-string)]
-    (if (m/validate mcp-spec/Message data)
+    (if (m/validate (m/schema mcp-spec/Message) data)
       data
       (throw (ex-info "Invalid JSON-RPC message" {:data data
                                                   :explanation (m/explain mcp-spec/Message data)})))))
