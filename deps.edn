@@ -1,0 +1,3 @@
+{:deps {org.httpkit/http-kit "2.5.3"
+        babashka/json "0.1.5"
+        metosin/malli "0.20.0-alpha3"}}
