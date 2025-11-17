@@ -12,6 +12,8 @@ jobs:
         uses: turtlequeue/setup-babashka@v1.7.0
         with:
           babashka-version: 1.12.209
+      - name: Check current directory
+        run: ls -al
       - name: Check bb runs
         run: bb --version
       - name: Check avilable tasks
