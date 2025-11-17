@@ -1,0 +1,24 @@
+name: Simple example of using the babashka action
+
+on: [push, pull_request]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Babashka
+        uses: turtlequeue/setup-babashka@v1.7.0
+        with:
+          babashka-version: 1.12.209
+      - name: Check bb runs
+        run: bb --version
+      - name: Check avilable tasks
+        run: bb tasks
+      - name: Summary
+        run: |
+          echo "Starting fast Clojure execution..."
+          bb -f action_summary.clj
+      - name: Run tests
+        run: bb run-test
