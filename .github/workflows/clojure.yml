@@ -12,15 +12,13 @@ jobs:
         uses: turtlequeue/setup-babashka@v1.7.0
         with:
           babashka-version: 1.12.209
-      - name: Check current directory
-        run: ls -al
       - name: Check bb runs
         run: bb --version
       - name: Check avilable tasks
         run: bb tasks
-      - name: Run tests
-        run: bb :test
       - name: Summary
         run: |
           echo "Starting fast Clojure execution..."
           bb -f action_summary.clj
+      - name: Run tests
+        run: bb run-test
