@@ -6,6 +6,10 @@ jobs:
   simple:
     runs-on: ubuntu-latest
     steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup Babashka
         uses: turtlequeue/setup-babashka@v1.7.0
         with:
