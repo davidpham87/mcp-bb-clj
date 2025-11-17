@@ -1,3 +1,5 @@
-{:deps {org.httpkit/http-kit "2.5.3"
-        babashka/json "0.1.5"
-        metosin/malli "0.20.0-alpha3"}}
+{:deps {org.httpkit/http-kit "2.9.0-beta1"
+        babashka/json "0.1.6"
+        metosin/malli "0.20.0"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :main-opts ["-m" "mcp-bb-clj.core-test"]}}}
