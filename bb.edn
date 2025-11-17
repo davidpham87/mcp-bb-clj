@@ -1,9 +1,8 @@
 {:paths ["src"]
- :tasks {:test {:main "mcp-bb-clj.core-test"
-                :requires ([babashka.classpath :as cp]
-                           [babashka.fs :as fs]
-                           [babashka.tasks :as tasks])
-                :proc (->> (fs/glob "test" "**/*_test.clj")
-                           (map str)
-                           (clojure.string/join " ")
-                           (tasks/shell "clojure -M:test -m babashka.test-runner"))}}}
+ :tasks {:test {:extra-paths ["test"]
+                :extra-deps {io.github.cognitect-labs/test-runner
+                             {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+                :task (exec 'cognitect.test-runner.api/test)
+                :exec-args {:dirs ["test"]}
+                :org.babashka/cli {:coerce {:nses [:symbol]
+                                            :vars [:symbol]}}}}}
