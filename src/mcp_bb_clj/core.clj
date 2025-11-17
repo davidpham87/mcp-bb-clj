@@ -1,7 +1,8 @@
 (ns mcp-bb-clj.core
   (:require [org.httpkit.server :as server]
             [mcp-bb-clj.mcp.server :as mcp-server]
-            [mcp-bb-clj.mcp.json-rpc :as rpc]))
+            [mcp-bb-clj.mcp.json-rpc :as rpc]
+            [mcp-bb-clj.malli-tools :as malli-tools]))
 
 (defn app
   "The http-kit request handler. It processes MCP requests."
@@ -35,5 +36,8 @@
   (let [port (Integer/parseInt (or (first args) "8080"))
         mcp-server (mcp-server/create-server)]
     (mcp-server/add-tool! mcp-server echo-tool)
+    (mcp-server/add-tool! mcp-server malli-tools/validate-schema-tool)
+    (mcp-server/add-tool! mcp-server malli-tools/generate-sample-tool)
+    (mcp-server/add-tool! mcp-server malli-tools/infer-schema-tool)
     (server/run-server (app mcp-server) {:port port})
     (println (str "server running at http://127.0.0.1:" port))))
