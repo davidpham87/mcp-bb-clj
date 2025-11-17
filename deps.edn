@@ -1,3 +1,1 @@
-{:deps {org.httpkit/http-kit "2.5.3"}
- :aliases {:test {:extra-paths ["test"]
-                  :main-opts ["-m" "mcp-bb-clj.core-test"]}}}
+{:deps {org.httpkit/http-kit "2.5.3"}}
