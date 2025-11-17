@@ -1,7 +1,8 @@
 (ns mcp-bb-clj.malli-tools
   (:require [malli.core :as m]
             [malli.generator :as mg]
-            [malli.provider :as mp]))
+            [malli.provider :as mp]
+            [malli.util]))
 
 (def validate-schema-tool
   {:name "validate-schema"
