@@ -14,5 +14,8 @@ jobs:
       - name: Check bb runs
         run: bb --version
 
+      - name: Check avilable tasks
+        run: bb tasks
+ 
       - name: Run tests
         run: bb :test
