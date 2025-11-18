@@ -1,5 +1,7 @@
 {:deps    {http-kit/http-kit    {:mvn/version "2.9.0-beta1"}
            org.babashka/json    {:mvn/version "0.1.6"}
-           metosin/malli        {:mvn/version "0.20.0-alpha3"}}
+           metosin/malli        {:mvn/version "0.20.0-alpha3"}
+           nrepl/nrepl          {:mvn/version "1.0.0"}
+           cider/cider-nrepl    {:mvn/version "0.45.0"}}
  :aliases {:test {:extra-paths ["test"]
                   :main-opts   ["-m" "mcp-bb-clj.core-test"]}}}
