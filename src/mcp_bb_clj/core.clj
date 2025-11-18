@@ -35,9 +35,10 @@
 (defn -main [& args]
   (let [port (Integer/parseInt (or (first args) "8080"))
         mcp-server (mcp-server/create-server)]
-    (mcp-server/add-tool! mcp-server echo-tool)
-    (mcp-server/add-tool! mcp-server malli-tools/validate-schema-tool)
-    (mcp-server/add-tool! mcp-server malli-tools/generate-sample-tool)
-    (mcp-server/add-tool! mcp-server malli-tools/infer-schema-tool)
+    (mcp-server/add-tool! mcp-server
+                          echo-tool
+                          malli-tools/validate-schema-tool
+                          malli-tools/generate-sample-tool
+                          malli-tools/infer-schema-tool)
     (server/run-server (app mcp-server) {:port port})
     (println (str "server running at http://127.0.0.1:" port))))
