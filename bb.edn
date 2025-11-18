@@ -6,8 +6,4 @@
                    :task (exec 'cognitect.test-runner.api/test)
                    :exec-args {:dirs ["test"]}
                    :org.babashka/cli {:coerce {:nses [:symbol]
-                                               :vars [:symbol]}}}}
-        repl {:extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}
-                           cider/cider-nrepl {:mvn/version "0.45.0"}}
-              :task (exec 'mcp-bb-clj.repl')}
-        eval {:task (exec 'mcp-bb-clj.eval)}}}
+                                               :vars [:symbol]}}}}}

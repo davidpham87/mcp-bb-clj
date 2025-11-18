@@ -10,5 +10,6 @@
       (edn/read-string (slurp prompt-file)))))
 
 (defn save-prompt [prompt-name content]
+  (.mkdirs (io/file prompts-dir))
   (let [prompt-file (io/file prompts-dir (str prompt-name ".edn"))]
     (spit prompt-file (pr-str content))))
