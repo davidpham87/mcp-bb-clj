@@ -26,12 +26,21 @@
 (def echo-tool
   {:name "echo"
    :description "Echoes the input text"
-   :inputSchema {:type "object"
-                 :properties {"text" {:type "string"}}
-                 :required ["text"]}
+   :input-schema {:type "object"
+                  :properties {"text" {:type "string"}}
+                  :required ["text"]}
    :implementation (fn [{:keys [text]}]
                      {:content [{:type "text" :text text}]
-                      :isError false})})
+                      :is-error false})})
+
+(def greeting-prompt
+  {:name "greeting"
+   :description "Generates a greeting message."
+   :arguments {:type "object"
+               :properties {"name" {:type "string"}}
+               :required ["name"]}
+   :prompt-fn (fn [{:keys [name]}]
+                (str "Hello, " name "!"))})
 
 (defn -main [& args]
   (let [port (Integer/parseInt (or (first args) "8080"))
@@ -40,10 +49,8 @@
     (mcp-server/add-tool! mcp-server malli-tools/validate-schema-tool)
     (mcp-server/add-tool! mcp-server malli-tools/generate-sample-tool)
     (mcp-server/add-tool! mcp-server malli-tools/infer-schema-tool)
-    (mcp-server/add-tool! mcp-server tools/repl-tool)
+    (mcp-server/add-tool! mcp-server tools/start-repl-tool)
     (mcp-server/add-tool! mcp-server tools/eval-tool)
-    (mcp-server/add-tool! mcp-server tools/load-prompt-tool)
-    (mcp-server/add-tool! mcp-server tools/save-prompt-tool)
-    (mcp-server/add-tool! mcp-server tools/greeting-tool)
+    (mcp-server/add-prompt! mcp-server greeting-prompt)
     (server/run-server (app mcp-server) {:port port})
     (println (str "server running at http://127.0.0.1:" port))))
