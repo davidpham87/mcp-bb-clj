@@ -75,3 +75,13 @@
                          {:content [{:type "text"
                                      :text (str "Error saving prompt: " (.getMessage e))}]
                           :isError true})))})
+
+(def greeting-tool
+  (prompts/create-prompt-tool
+   {:name "greeting"
+    :description "Generates a greeting message."
+    :inputSchema {:type "object"
+                  :properties {"name" {:type "string"}}
+                  :required ["name"]}
+    :prompt-fn (fn [{:keys [name]}]
+                 (str "Hello, " name "!"))}))
