@@ -57,8 +57,8 @@
 
 ;;; Tool management
 (defn add-tool!
-  "Adds one or more tools to the server."
-  [server-atom & tools]
+  "Adds a collection of tools to the server."
+  [server-atom {:keys [tools]}]
   (swap! server-atom update-in [:tools]
          (fn [current-tools]
            (reduce (fn [acc tool]
