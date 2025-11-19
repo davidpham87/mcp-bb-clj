@@ -1,12 +1,15 @@
 (ns mcp-bb-clj.mcp.server
-  (:require [mcp-bb-clj.mcp.json-rpc :as rpc]))
+  (:require [mcp-bb-clj.mcp.json-rpc :as rpc]
+            [mcp-bb-clj.mcp.prompts :as prompts]))
 
 ;;; Server state
 (def initial-state
   {:tools {}
+   :prompts prompts/default-prompts
    :protocol-version "2025-06-18"
    :server-info {:name "mcp-bb-clj" :version "0.0.1"}
-   :capabilities {:tools {:listChanged false}}})
+   :capabilities {:tools {:listChanged false}
+                  :prompts {:listChanged false}}})
 
 (defn create-server
   "Creates a new server instance with an initial state."
@@ -41,6 +44,18 @@
         (rpc/success-response id result))
       (rpc/error-response id {:code -32601 :message "Method not found"}))))
 
+(defmethod handle-request "prompts/list"
+  [{:keys [id] :as request} server-atom]
+  (let [result (prompts/list-prompts (:prompts @server-atom) nil)]
+    (rpc/success-response id result)))
+
+(defmethod handle-request "prompts/get"
+  [{:keys [id params] :as request} server-atom]
+  (let [result (prompts/get-prompt (:prompts @server-atom) params)]
+    (if (:isError result)
+      (rpc/error-response id {:code -32000 :message "Prompt error" :data result})
+      (rpc/success-response id result))))
+
 (defmethod handle-request :default
   [{:keys [id method] :as request} server-atom]
   (rpc/error-response id {:code -32601
@@ -60,3 +75,10 @@
   "Adds a tool to the server."
   [server-atom tool]
   (swap! server-atom update-in [:tools] assoc (:name tool) tool))
+
+;;; Prompt management
+(defn add-prompt!
+  "Adds a prompt to the server."
+  [server-atom prompt]
+  (when (prompts/valid-prompt? prompt)
+    (swap! server-atom update-in [:prompts] assoc (:name prompt) prompt)))

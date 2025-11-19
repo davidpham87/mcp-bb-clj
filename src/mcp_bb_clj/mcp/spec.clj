@@ -4,34 +4,30 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; JSON-RPC 2.0 specs
 
-(def JSONRPC
-  [:map
-   [:jsonrpc [:= "2.0"]]])
-
 (def Request
-  [:merge JSONRPC
-   [:map
-    [:id [:or :string :int]]
-    [:method :string]
-    [:params {:optional true} :map]]])
+  [:map
+   [:jsonrpc [:= "2.0"]]
+   [:id [:or :string :int]]
+   [:method :string]
+   [:params {:optional true} :map]])
 
 (def Notification
-  [:merge JSONRPC
-   [:map
-    [:method :string]
-    [:params {:optional true} :map]]])
+  [:map
+   [:jsonrpc [:= "2.0"]]
+   [:method :string]
+   [:params {:optional true} :map]])
 
 (def Response
-  [:merge JSONRPC
-   [:map
-    [:id [:or :string :int]]
-    [:result :any]]])
+  [:map
+   [:jsonrpc [:= "2.0"]]
+   [:id [:or :string :int]]
+   [:result :any]])
 
 (def ErrorResponse
-  [:merge JSONRPC
-   [:map
-    [:id [:or :string :int]]
-    [:error :map]]])
+  [:map
+   [:jsonrpc [:= "2.0"]]
+   [:id [:or :string :int]]
+   [:error :map]])
 
 (def Message
   [:or Request Notification Response ErrorResponse])
