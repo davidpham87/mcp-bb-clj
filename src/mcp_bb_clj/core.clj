@@ -45,5 +45,6 @@
     (mcp-server/add-tool! mcp-server tools/load-prompt-tool)
     (mcp-server/add-tool! mcp-server tools/save-prompt-tool)
     (mcp-server/add-tool! mcp-server tools/greeting-tool)
+    (mcp-server/add-tool! mcp-server tools/portal-tool)
     (server/run-server (app mcp-server) {:port port})
     (println (str "server running at http://127.0.0.1:" port))))

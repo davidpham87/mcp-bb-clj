@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.edn :as edn]
             [mcp-bb-clj.prompts :as prompts]
-            [babashka.nrepl.server :as nrepl-server]))
+            [babashka.nrepl.server :as nrepl-server]
+            [portal.api :as p]))
 
 (def repl-tool
   {:name "start-repl"
@@ -85,3 +86,28 @@
                   :required ["name"]}
     :prompt-fn (fn [{:keys [name]}]
                  (str "Hello, " name "!"))}))
+
+(defonce portal-atom (atom nil))
+
+(def portal-tool
+  {:name        "portal"
+   :description "Sends a value to a portal."
+   :inputSchema {:type       "object"
+                 :properties {"code" {:type "string"}}
+                 :required   ["code"]}
+   :implementation
+   (fn [{:keys [code]}]
+     (try
+       (when (nil? @portal-atom)
+         (let [p (p/open {:value (atom [])})]
+           (add-tap #'p/submit)
+           (reset! portal-atom p)))
+       (let [result (eval (read-string code))]
+         (p/submit result)
+         {:content          [{:type "text"
+                              :text (str "Result: " (pr-str result))}]
+          :structuredContent {:result result}})
+       (catch Exception e
+         {:content [{:type    "text"
+                     :text    (str "Error evaluating code: " (.getMessage e))}]
+          :isError true})))})
