@@ -61,6 +61,7 @@
                                                         :text result}}]}))
       (rpc/error-response id {:code -32601 :message "Prompt not found"}))))
 
+
 (defmethod handle-request :default
   [{:keys [id method] :as request} server-atom]
   (rpc/error-response id {:code -32601

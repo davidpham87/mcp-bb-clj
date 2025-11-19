@@ -3,7 +3,8 @@
             [mcp-bb-clj.mcp.server :as mcp-server]
             [mcp-bb-clj.mcp.json-rpc :as rpc]
             [mcp-bb-clj.malli-tools :as malli-tools]
-            [mcp-bb-clj.tools :as tools]))
+            [mcp-bb-clj.tools :as tools]
+            [mcp-bb-clj.prompts :as prompts]))
 
 (defn app
   "The http-kit request handler. It processes MCP requests."
