@@ -9,7 +9,7 @@
 
 (deftest handle-request-test
   (let [s (server/create-server)]
-    (server/add-tool! s test-tool)
+    (server/add-tool! s {:tools [test-tool]})
 
     (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false}}}}
            (server/handle-request (rpc/request 1 "initialize" {}) s)))
@@ -19,3 +19,10 @@
 
     (is (= {:jsonrpc "2.0", :id 4, :error {:code -32601, :message "Method not found: non-existent-method"}}
            (server/handle-request (rpc/request 4 "non-existent-method" {}) s)))))
+
+(deftest add-multiple-tools-test
+  (let [s (server/create-server)
+        tool1 {:name "tool1" :implementation (fn [args] args)}
+        tool2 {:name "tool2" :implementation (fn [args] args)}]
+    (server/add-tool! s {:tools [tool1 tool2]})
+    (is (= #{"tool1" "tool2"} (set (keys (:tools @s)))))))
