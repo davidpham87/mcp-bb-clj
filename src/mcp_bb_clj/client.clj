@@ -36,6 +36,14 @@
     (let [echo-response @(mcp-client/call-tool @client-atom "echo" {:text "Hello from client!"})]
       (println "Server response to tools/call (echo):" echo-response))
 
+    (println "\nListing resources...")
+    (let [resources-response @(mcp-client/list-resources @client-atom)]
+      (println "Server response to resources/list:" resources-response))
+
+    (println "\nReading resource 'test://resource'...")
+    (let [read-response @(mcp-client/read-resource @client-atom "test://resource")]
+      (println "Server response to resources/read:" read-response))
+
     ;; Keep the process alive for a moment to receive async responses.
     (Thread/sleep 1000)
     (println "\nClient finished.")))

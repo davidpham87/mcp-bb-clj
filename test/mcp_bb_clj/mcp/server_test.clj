@@ -11,10 +11,10 @@
   (let [s (server/create-server)]
     (server/add-tool! s test-tool)
 
-    (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false}}}}
+    (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false} :resources {:subscribe false :listChanged false}}}}
            (server/handle-request (rpc/request 1 "initialize" {}) s)))
 
-    (is (= {:jsonrpc "2.0", :id 2, :result {:tools {"test-tool" test-tool}}}
+    (is (= {:jsonrpc "2.0", :id 2, :result {:tools [test-tool]}}
            (server/handle-request (rpc/request 2 "tools/list" {}) s)))
 
     (is (= {:jsonrpc "2.0", :id 3, :result {:result "bar"}}
@@ -22,3 +22,21 @@
 
     (is (= {:jsonrpc "2.0", :id 4, :error {:code -32601, :message "Method not found: non-existent-method"}}
            (server/handle-request (rpc/request 4 "non-existent-method" {}) s)))))
+
+(def test-resource
+  {:uri "test://resource"
+   :name "Test Resource"
+   :read-fn (fn [uri] [{:uri uri :mimeType "text/plain" :text "Hello"}])})
+
+(deftest resource-test
+  (let [s (server/create-server)]
+    (server/add-resource! s test-resource)
+
+    (is (= {:jsonrpc "2.0", :id 1, :result {:resources [{:uri "test://resource" :name "Test Resource"}]}}
+           (server/handle-request (rpc/request 1 "resources/list" {}) s)))
+
+    (is (= {:jsonrpc "2.0", :id 2, :result {:contents [{:uri "test://resource" :mimeType "text/plain" :text "Hello"}]}}
+           (server/handle-request (rpc/request 2 "resources/read" {:uri "test://resource"}) s)))
+
+    (is (= {:jsonrpc "2.0", :id 3, :error {:code -32002, :message "Resource not found"}}
+           (server/handle-request (rpc/request 3 "resources/read" {:uri "unknown"}) s)))))
