@@ -5,16 +5,24 @@
 
 (def test-tool
   {:name "test-tool"
+   :description "A test tool"
+   :input-schema {:type "object"}
    :implementation (fn [args] {:result (:foo args)})})
+
+(def test-prompt
+  {:name "test-prompt"
+   :description "A test prompt"
+   :arguments []
+   :prompt-fn (fn [args] (str "Hello, " (:name args)))})
 
 (deftest handle-request-test
   (let [s (server/create-server)]
-    (server/add-tool! s test-tool)
+    (server/add-tool! s {:tools [test-tool]})
 
-    (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false} :resources {:subscribe false :listChanged false}}}}
+    (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false} :prompts {:listChanged false} :resources {:subscribe false :listChanged false}}}}
            (server/handle-request (rpc/request 1 "initialize" {}) s)))
 
-    (is (= {:jsonrpc "2.0", :id 2, :result {:tools [test-tool]}}
+    (is (= {:jsonrpc "2.0", :id 2, :result {:tools [{:name "test-tool" :description "A test tool" :inputSchema {:type "object"}}]}}
            (server/handle-request (rpc/request 2 "tools/list" {}) s)))
 
     (is (= {:jsonrpc "2.0", :id 3, :result {:result "bar"}}
@@ -22,6 +30,13 @@
 
     (is (= {:jsonrpc "2.0", :id 4, :error {:code -32601, :message "Method not found: non-existent-method"}}
            (server/handle-request (rpc/request 4 "non-existent-method" {}) s)))))
+
+(deftest add-multiple-tools-test
+  (let [s (server/create-server)
+        tool1 {:name "tool1" :implementation (fn [args] args)}
+        tool2 {:name "tool2" :implementation (fn [args] args)}]
+    (server/add-tool! s {:tools [tool1 tool2]})
+    (is (= #{"tool1" "tool2"} (set (keys (:tools @s)))))))
 
 (def test-resource
   {:uri "test://resource"

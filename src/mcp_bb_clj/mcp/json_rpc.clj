@@ -1,7 +1,10 @@
 (ns mcp-bb-clj.mcp.json-rpc
   (:require [babashka.json :as json]
             [mcp-bb-clj.mcp.spec :as mcp-spec]
-            [malli.core :as m]))
+            [malli.core :as m]
+            [malli.util :as mu]))
+
+(def registry (merge (m/default-schemas) (mu/schemas)))
 
 (defn request
   "Creates a JSON-RPC request map."

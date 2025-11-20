@@ -1,13 +1,16 @@
 (ns mcp-bb-clj.mcp.server
-  (:require [mcp-bb-clj.mcp.json-rpc :as rpc]))
+  (:require [mcp-bb-clj.mcp.json-rpc :as rpc]
+            [mcp-bb-clj.mcp.prompts :as prompts]))
 
 ;;; Server state
 (def initial-state
   {:tools {}
+   :prompts prompts/default-prompts
    :resources {}
    :protocol-version "2025-06-18"
    :server-info {:name "mcp-bb-clj" :version "0.0.1"}
    :capabilities {:tools {:listChanged false}
+                  :prompts {:listChanged false}
                   :resources {:subscribe false
                               :listChanged false}}})
 
@@ -33,7 +36,12 @@
   (let [tools (vals (:tools @server-atom))]
     (rpc/success-response
      id
-     {:tools tools})))
+     {:tools (map (fn [t]
+                    (-> t
+                        (select-keys [:name :description :inputSchema :input-schema])
+                        (clojure.set/rename-keys {:input-schema :inputSchema})
+                        (select-keys [:name :description :inputSchema])))
+                  tools)})))
 
 (defmethod handle-request "tools/call"
   [{:keys [id params] :as request} server-atom]
@@ -43,6 +51,18 @@
       (let [result (tool-impl (:arguments params))]
         (rpc/success-response id result))
       (rpc/error-response id {:code -32601 :message "Method not found"}))))
+
+(defmethod handle-request "prompts/list"
+  [{:keys [id] :as request} server-atom]
+  (let [result (prompts/list-prompts (:prompts @server-atom) nil)]
+    (rpc/success-response id result)))
+
+(defmethod handle-request "prompts/get"
+  [{:keys [id params] :as request} server-atom]
+  (let [result (prompts/get-prompt (:prompts @server-atom) params)]
+    (if (:isError result)
+      (rpc/error-response id {:code -32000 :message "Prompt error" :data result})
+      (rpc/success-response id result))))
 
 (defmethod handle-request "resources/list"
   [{:keys [id] :as request} server-atom]
@@ -63,9 +83,6 @@
 
 (defmethod handle-request "notifications/cancelled"
   [{:keys [id] :as request} server-atom]
-  ;; Notification, no response needed usually, but if sent as request we must respond.
-  ;; But notifications usually don't have ID.
-  ;; If it has ID, we respond.
   (rpc/success-response id {}))
 
 (defmethod handle-request :default
@@ -86,14 +103,18 @@
   (cond
     (and (:method message) (:id message)) (handle-request message server-atom)
     (:method message) (handle-notification message server-atom)
-    ;; For now, we don't handle responses from the client
     :else nil))
 
 ;;; Tool management
 (defn add-tool!
-  "Adds a tool to the server."
-  [server-atom tool]
-  (swap! server-atom update-in [:tools] assoc (:name tool) tool))
+  "Adds a collection of tools to the server."
+  [server-atom {:keys [tools]}]
+  (swap! server-atom update-in [:tools]
+         (fn [current-tools]
+           (reduce (fn [acc tool]
+                     (assoc acc (:name tool) tool))
+                   current-tools
+                   tools))))
 
 ;;; Resource management
 (defn add-resource!
