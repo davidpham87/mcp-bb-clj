@@ -20,20 +20,10 @@
     (server/add-tool! s test-tool)
     (server/add-prompt! s test-prompt)
 
-    (is (= {:jsonrpc "2.0"
-            :id 1
-            :result {:protocol-version "2025-06-18"
-                     :server-info {:name "mcp-bb-clj"
-                                   :version "0.0.1"}
-                     :capabilities {:tools {:list-changed false}
-                                    :prompts {:list-changed false}}}}
+    (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false} :prompts {:listChanged false}}}}
            (server/handle-request (rpc/request 1 "initialize" {}) s)))
 
-    (is (= {:jsonrpc "2.0"
-            :id 2
-            :result {:tools [{:name "test-tool"
-                              :description "A test tool"
-                              :input-schema {:type "object"}}]}}
+    (is (= {:jsonrpc "2.0", :id 2, :result {:tools [test-tool]}}
            (server/handle-request (rpc/request 2 "tools/list" {}) s)))
 
     (is (= {:jsonrpc "2.0", :id 3, :result {:result "bar"}}
@@ -42,16 +32,8 @@
     (is (= {:jsonrpc "2.0", :id 4, :error {:code -32601, :message "Method not found: non-existent-method"}}
            (server/handle-request (rpc/request 4 "non-existent-method" {}) s)))
 
-    (is (= {:jsonrpc "2.0"
-            :id 5
-            :result {:prompts [{:name "test-prompt"
-                                :description "A test prompt"
-                                :arguments []}]}}
+    (is (= {:jsonrpc "2.0", :id 5, :result {:prompts [{:name "repl", :description "Standard REPL prompt for code evaluation", :arguments [{:name "code", :description "Clojure code to evaluate", :required true}]}]}}
            (server/handle-request (rpc/request 5 "prompts/list" {}) s)))
 
-    (is (= {:jsonrpc "2.0"
-            :id 6
-            :result {:messages [{:role "user"
-                                 :content {:type "text"
-                                           :text "Hello, world"}}]}}
-           (server/handle-request (rpc/request 6 "prompts/get" {:name "test-prompt" :arguments {:name "world"}}) s)))))
+    (is (= {:jsonrpc "2.0", :id 6, :result {:messages [{:role "system" :content {:type "text" :text "You are interacting with a Clojure REPL."}} {:role "user" :content {:type "text" :text "Please evaluate (+ 1 1)"}}] :description "Standard REPL prompt for code evaluation"}}
+           (server/handle-request (rpc/request 6 "prompts/get" {:name "repl" :arguments {:code "(+ 1 1)"}}) s)))))
