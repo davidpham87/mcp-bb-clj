@@ -72,13 +72,11 @@
 
 ;;; Tool management
 (defn add-tool!
-  "Adds a tool to the server."
-  [server-atom tool]
-  (swap! server-atom update-in [:tools] assoc (:name tool) tool))
-
-;;; Prompt management
-(defn add-prompt!
-  "Adds a prompt to the server."
-  [server-atom prompt]
-  (when (prompts/valid-prompt? prompt)
-    (swap! server-atom update-in [:prompts] assoc (:name prompt) prompt)))
+  "Adds a collection of tools to the server."
+  [server-atom {:keys [tools]}]
+  (swap! server-atom update-in [:tools]
+         (fn [current-tools]
+           (reduce (fn [acc tool]
+                     (assoc acc (:name tool) tool))
+                   current-tools
+                   tools))))
