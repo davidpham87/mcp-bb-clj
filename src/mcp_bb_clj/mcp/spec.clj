@@ -77,7 +77,7 @@
 (def EmbeddedResource
   [:map
    [:type [:= "resource"]]
-   [:resource [:or :map]]
+   [:resource [:or :any]]
    [:annotations {:optional true} Annotations]])
 
 (def ContentBlock

@@ -24,8 +24,8 @@
   (let [state @server-atom]
     (rpc/success-response
      id
-     {:protocolVersion (:protocol-version state)
-      :serverInfo (:server-info state)
+     {:protocol-version (:protocol-version state)
+      :server-info (:server-info state)
       :capabilities (:capabilities state)})))
 
 (defmethod handle-request "tools/list"
@@ -33,7 +33,7 @@
   (let [tools (vals (:tools @server-atom))]
     (rpc/success-response
      id
-     {:tools tools})))
+     {:tools (map #(select-keys % [:name :description :input-schema]) tools)})))
 
 (defmethod handle-request "tools/call"
   [{:keys [id params] :as request} server-atom]

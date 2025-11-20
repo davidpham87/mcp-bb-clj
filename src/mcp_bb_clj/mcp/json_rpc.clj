@@ -1,7 +1,10 @@
 (ns mcp-bb-clj.mcp.json-rpc
   (:require [babashka.json :as json]
             [mcp-bb-clj.mcp.spec :as mcp-spec]
-            [malli.core :as m]))
+            [malli.core :as m]
+            [malli.util :as mu]))
+
+(def registry (merge (m/default-schemas) (mu/schemas)))
 
 (defn request
   "Creates a JSON-RPC request map."
@@ -35,8 +38,8 @@
 (defn parse
   "Parses a JSON string and validates it as a JSON-RPC message."
   [json-string]
-  (let [data (json/read-str json-string {:key-fn keyword})]
-    (if (m/validate mcp-spec/Message data)
+  (let [data (json/read-str json-string)]
+    (if (m/validate (m/schema mcp-spec/Message {:registry registry}) data)
       data
       (throw (ex-info "Invalid JSON-RPC message" {:data data
                                                   :explanation (m/explain mcp-spec/Message data)})))))

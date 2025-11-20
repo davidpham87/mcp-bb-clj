@@ -5,11 +5,20 @@
 
 (def test-tool
   {:name "test-tool"
+   :description "A test tool"
+   :input-schema {:type "object"}
    :implementation (fn [args] {:result (:foo args)})})
+
+(def test-prompt
+  {:name "test-prompt"
+   :description "A test prompt"
+   :arguments []
+   :prompt-fn (fn [args] (str "Hello, " (:name args)))})
 
 (deftest handle-request-test
   (let [s (server/create-server)]
     (server/add-tool! s test-tool)
+    (server/add-prompt! s test-prompt)
 
     (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false} :prompts {:listChanged false}}}}
            (server/handle-request (rpc/request 1 "initialize" {}) s)))
