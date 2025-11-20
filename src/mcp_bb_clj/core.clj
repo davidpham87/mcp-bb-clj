@@ -2,7 +2,9 @@
   (:require [org.httpkit.server :as server]
             [mcp-bb-clj.mcp.server :as mcp-server]
             [mcp-bb-clj.mcp.json-rpc :as rpc]
-            [mcp-bb-clj.malli-tools :as malli-tools]))
+            [mcp-bb-clj.malli-tools :as malli-tools]
+            [mcp-bb-clj.tools :as tools]
+            [mcp-bb-clj.prompts :as prompts]))
 
 (defn app
   "The http-kit request handler. It processes MCP requests."
@@ -25,12 +27,21 @@
 (def echo-tool
   {:name "echo"
    :description "Echoes the input text"
-   :inputSchema {:type "object"
-                 :properties {"text" {:type "string"}}
-                 :required ["text"]}
+   :input-schema {:type "object"
+                  :properties {"text" {:type "string"}}
+                  :required ["text"]}
    :implementation (fn [{:keys [text]}]
                      {:content [{:type "text" :text text}]
-                      :isError false})})
+                      :is-error false})})
+
+(def greeting-prompt
+  {:name "greeting"
+   :description "Generates a greeting message."
+   :arguments {:type "object"
+               :properties {"name" {:type "string"}}
+               :required ["name"]}
+   :prompt-fn (fn [{:keys [name]}]
+                (str "Hello, " name "!"))})
 
 (defn -main [& args]
   (let [port (Integer/parseInt (or (first args) "8080"))
