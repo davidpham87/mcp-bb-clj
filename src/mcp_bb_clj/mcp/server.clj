@@ -1,6 +1,7 @@
 (ns mcp-bb-clj.mcp.server
   (:require [mcp-bb-clj.mcp.json-rpc :as rpc]
-            [mcp-bb-clj.mcp.prompts :as prompts]))
+            [mcp-bb-clj.mcp.prompts :as prompts]
+            [clojure.set :as set]))
 
 ;;; Server state
 (def initial-state
@@ -39,7 +40,7 @@
      {:tools (map (fn [t]
                     (-> t
                         (select-keys [:name :description :inputSchema :input-schema])
-                        (clojure.set/rename-keys {:input-schema :inputSchema})
+                        (set/rename-keys {:input-schema :inputSchema})
                         (select-keys [:name :description :inputSchema])))
                   tools)})))
 
@@ -48,8 +49,9 @@
   (let [tool-name (:name params)
         tool-impl (get-in @server-atom [:tools tool-name :implementation])]
     (if tool-impl
-      (let [result (tool-impl (:arguments params))]
-        (rpc/success-response id result))
+      (let [result (tool-impl (:arguments params))
+            normalized-result (set/rename-keys result {:is-error :isError})]
+        (rpc/success-response id normalized-result))
       (rpc/error-response id {:code -32601 :message "Method not found"}))))
 
 (defmethod handle-request "prompts/list"

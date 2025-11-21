@@ -21,7 +21,7 @@
                        (catch Exception e
                          {:content [{:type "text"
                                      :text (str "Error starting nREPL server: " (.getMessage e))}]
-                          :is-error true})))})
+                          :isError true})))})
 
 (def eval-tool
   {:name "eval"
