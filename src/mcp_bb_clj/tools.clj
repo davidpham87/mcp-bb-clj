@@ -48,7 +48,7 @@
                  :required ["name"]}
    :implementation (fn [{:keys [name]}]
                      (try
-                       (if-let [content (prompts/load-prompt name)]
+                       (if-let [content (prompts/get-prompt name)]
                          {:content [{:type "text"
                                      :text (str "Prompt loaded: " (pr-str content))}]
                           :structuredContent {:prompt content}}
@@ -69,7 +69,7 @@
                  :required ["name" "content"]}
    :implementation (fn [{:keys [name content]}]
                      (try
-                       (prompts/save-prompt name content)
+                       (prompts/save-prompt! name content)
                        {:content [{:type "text"
                                    :text (str "Prompt saved: " name)}]}
                        (catch Exception e

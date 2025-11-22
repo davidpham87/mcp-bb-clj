@@ -17,3 +17,11 @@
   (.mkdirs (io/file prompts-dir))
   (let [prompt-file (io/file prompts-dir (str prompt-name ".edn"))]
     (spit prompt-file (pr-str content))))
+
+(defn create-prompt-tool
+  "Creates a tool definition from a prompt function."
+  [{:keys [prompt-fn] :as tool-def}]
+  (assoc tool-def :implementation
+         (fn [params]
+           {:content [{:type "text"
+                       :text (prompt-fn params)}]})))

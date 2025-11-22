@@ -28,8 +28,8 @@
   (let [state @server-atom]
     (rpc/success-response
      id
-     {:protocol-version (:protocol-version state)
-      :server-info (:server-info state)
+     {:protocolVersion (:protocol-version state)
+      :serverInfo (:server-info state)
       :capabilities (:capabilities state)})))
 
 (defmethod handle-request "tools/list"
