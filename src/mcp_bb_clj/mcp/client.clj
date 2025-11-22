@@ -5,7 +5,7 @@
 (defn create-client
   "Creates a new client instance with an initial state.
    `send-fn` is a function that takes a JSON-RPC string and sends it to the server.
-   `opts` is a map of options, including `:client-info`."
+   `opts` is a map of options, including `:client-info` and optional `:notification-handler`."
   [send-fn opts]
   (atom {:send-fn send-fn
          :request-id 0
@@ -13,6 +13,7 @@
          :server-info nil
          :server-capabilities nil
          :client-info (:client-info opts)
+         :notification-handler (:notification-handler opts)
          :protocol-version "2025-06-18"}))
 
 ;;; Private helpers
@@ -51,6 +52,21 @@
   [client-atom tool-name arguments]
   (call-remote client-atom "tools/call" {:name tool-name :arguments arguments}))
 
+(defn list-resources
+  "Sends a resources/list request to the server."
+  [client-atom]
+  (call-remote client-atom "resources/list" {}))
+
+(defn read-resource
+  "Sends a resources/read request to the server."
+  [client-atom uri]
+  (call-remote client-atom "resources/read" {:uri uri}))
+
+(defn notify
+  "Sends a notification to the server."
+  [client-atom method params]
+  (notify-remote client-atom method params))
+
 ;;; Message Handling
 (defn- handle-response
   [client-atom {:keys [id result error]}]
@@ -66,5 +82,7 @@
   [client-atom message]
   (cond
     (or (:result message) (:error message)) (handle-response client-atom message)
-    (:method message) (println "Received notification:" (:method message)) ; Placeholder for notification handling
+    (:method message) (if-let [handler (:notification-handler @client-atom)]
+                        (handler message)
+                        (println "Received notification:" (:method message)))
     :else (println "Received unknown message from server:" message)))
