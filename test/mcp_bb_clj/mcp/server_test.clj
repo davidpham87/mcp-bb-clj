@@ -19,10 +19,10 @@
   (let [s (server/create-server)]
     (server/add-tool! s {:tools [test-tool]})
 
-    (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false} :prompts {:listChanged false}}}}
+    (is (= {:jsonrpc "2.0", :id 1, :result {:protocolVersion "2025-06-18", :serverInfo {:name "mcp-bb-clj", :version "0.0.1"}, :capabilities {:tools {:listChanged false} :prompts {:listChanged false} :resources {:subscribe false :listChanged false}}}}
            (server/handle-request (rpc/request 1 "initialize" {}) s)))
 
-    (is (= {:jsonrpc "2.0", :id 2, :result {:tools [test-tool]}}
+    (is (= {:jsonrpc "2.0", :id 2, :result {:tools [{:name "test-tool" :description "A test tool" :inputSchema {:type "object"}}]}}
            (server/handle-request (rpc/request 2 "tools/list" {}) s)))
 
     (is (= {:jsonrpc "2.0", :id 3, :result {:result "bar"}}
@@ -37,3 +37,21 @@
         tool2 {:name "tool2" :implementation (fn [args] args)}]
     (server/add-tool! s {:tools [tool1 tool2]})
     (is (= #{"tool1" "tool2"} (set (keys (:tools @s)))))))
+
+(def test-resource
+  {:uri "test://resource"
+   :name "Test Resource"
+   :read-fn (fn [uri] [{:uri uri :mimeType "text/plain" :text "Hello"}])})
+
+(deftest resource-test
+  (let [s (server/create-server)]
+    (server/add-resource! s test-resource)
+
+    (is (= {:jsonrpc "2.0", :id 1, :result {:resources [{:uri "test://resource" :name "Test Resource"}]}}
+           (server/handle-request (rpc/request 1 "resources/list" {}) s)))
+
+    (is (= {:jsonrpc "2.0", :id 2, :result {:contents [{:uri "test://resource" :mimeType "text/plain" :text "Hello"}]}}
+           (server/handle-request (rpc/request 2 "resources/read" {:uri "test://resource"}) s)))
+
+    (is (= {:jsonrpc "2.0", :id 3, :error {:code -32002, :message "Resource not found"}}
+           (server/handle-request (rpc/request 3 "resources/read" {:uri "unknown"}) s)))))

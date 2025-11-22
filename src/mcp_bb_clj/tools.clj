@@ -8,7 +8,7 @@
 (def start-repl-tool
   {:name "start-repl"
    :description "Starts a Babashka nREPL server."
-   :input-schema {:type "object"
+   :inputSchema {:type "object"
                   :properties {"host" {:type "string" :default "127.0.0.1"}
                                "port" {:type "integer" :default 7888}}
                   :required ["host" "port"]}
@@ -21,12 +21,12 @@
                        (catch Exception e
                          {:content [{:type "text"
                                      :text (str "Error starting nREPL server: " (.getMessage e))}]
-                          :is-error true})))})
+                          :isError true})))})
 
 (def eval-tool
   {:name "eval"
    :description "Evaluates a string of Clojure code. WARNING: This tool is a security risk and should not be exposed to untrusted users."
-   :input-schema {:type "object"
+   :inputSchema {:type "object"
                   :properties {"code" {:type "string"}}
                   :required ["code"]}
    :implementation (fn [{:keys [code]}]
