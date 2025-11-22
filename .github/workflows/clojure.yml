@@ -1,6 +1,6 @@
 name: Simple example of using the babashka action
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   run-tests:

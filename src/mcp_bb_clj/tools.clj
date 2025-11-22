@@ -8,7 +8,7 @@
 (def start-repl-tool
   {:name "start-repl"
    :description "Starts a Babashka nREPL server."
-   :input-schema {:type "object"
+   :inputSchema {:type "object"
                   :properties {"host" {:type "string" :default "127.0.0.1"}
                                "port" {:type "integer" :default 7888}}
                   :required ["host" "port"]}
@@ -26,7 +26,7 @@
 (def eval-tool
   {:name "eval"
    :description "Evaluates a string of Clojure code. WARNING: This tool is a security risk and should not be exposed to untrusted users."
-   :input-schema {:type "object"
+   :inputSchema {:type "object"
                   :properties {"code" {:type "string"}}
                   :required ["code"]}
    :implementation (fn [{:keys [code]}]
@@ -43,12 +43,12 @@
 (def load-prompt-tool
   {:name "load-prompt"
    :description "Loads a prompt from a file."
-   :input-schema {:type "object"
-                  :properties {"name" {:type "string"}}
-                  :required ["name"]}
+   :inputSchema {:type "object"
+                 :properties {"name" {:type "string"}}
+                 :required ["name"]}
    :implementation (fn [{:keys [name]}]
                      (try
-                       (if-let [content (prompts/get-prompt name)]
+                       (if-let [content (prompts/load-prompt name)]
                          {:content [{:type "text"
                                      :text (str "Prompt loaded: " (pr-str content))}]
                           :structuredContent {:prompt content}}
@@ -63,13 +63,13 @@
 (def save-prompt-tool
   {:name "save-prompt"
    :description "Saves a prompt to a file."
-   :input-schema {:type "object"
-                  :properties {"name" {:type "string"}
-                               "content" {:type "any"}}
-                  :required ["name" "content"]}
+   :inputSchema {:type "object"
+                 :properties {"name" {:type "string"}
+                              "content" {:type "any"}}
+                 :required ["name" "content"]}
    :implementation (fn [{:keys [name content]}]
                      (try
-                       (prompts/save-prompt! name content)
+                       (prompts/save-prompt name content)
                        {:content [{:type "text"
                                    :text (str "Prompt saved: " name)}]}
                        (catch Exception e
@@ -77,14 +77,24 @@
                                      :text (str "Error saving prompt: " (.getMessage e))}]
                           :isError true})))})
 
+(def greeting-tool
+  (prompts/create-prompt-tool
+   {:name "greeting"
+    :description "Generates a greeting message."
+    :inputSchema {:type "object"
+                  :properties {"name" {:type "string"}}
+                  :required ["name"]}
+    :prompt-fn (fn [{:keys [name]}]
+                 (str "Hello, " name "!"))}))
+
 (defonce portal-atom (atom nil))
 
 (def portal-tool
   {:name        "portal"
    :description "Sends a value to a portal."
-   :input-schema {:type       "object"
-                  :properties {"code" {:type "string"}}
-                  :required   ["code"]}
+   :inputSchema {:type       "object"
+                 :properties {"code" {:type "string"}}
+                 :required   ["code"]}
    :implementation
    (fn [{:keys [code]}]
      (try
