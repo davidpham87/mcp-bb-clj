@@ -43,3 +43,15 @@
             result (tool-impl {:name prompt-name})]
         (is (= prompt-content
                (get-in result [:structuredContent :prompt])))))))
+
+(deftest clj-kondo-tool-test
+  (testing "clj-kondo-tool lints code"
+    (let [tool-impl (:implementation tools/clj-kondo-tool)
+          code "(def x 1) (def x 2)"
+          result (tool-impl {:code code})]
+      (is (not (:isError result)))
+      (is (some? (:structured-content result)))
+      (let [findings (:findings (:structured-content result))]
+        (is (= 1 (count findings)))
+        (is (= "redefined var #'user/x" (:message (first findings))))
+        (is (= "input" (:filename (first findings))))))))
