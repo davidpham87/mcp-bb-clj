@@ -53,6 +53,7 @@
                                    malli-tools/infer-schema-tool
                                    tools/cljfmt-tool
                                    tools/zprint-tool
-                                   tools/find-malformed-delimiters-tool]})
+                                   tools/find-malformed-delimiters-tool
+                                   tools/clj-kondo-tool]})
     (server/run-server (app mcp-server) {:port port})
     (println (str "server running at http://127.0.0.1:" port))))
