@@ -23,6 +23,9 @@ The server comes with several built-in tools:
   - Input: `code` (string), `options` (optional EDN string)
 - **find-malformed-delimiters**: Checks Clojure code for malformed delimiters.
   - Input: `code` (string)
+- **clj-kondo**: Lints Clojure code using [clj-kondo](https://github.com/clj-kondo/clj-kondo).
+  - Input: `code` (string)
+  - **Prerequisite**: The `clj-kondo` binary must be installed and available in the system PATH.
 - **echo**: Echoes the input text.
 - **Malli Tools**: Tools for working with Malli schemas (`validate-schema`, `generate-sample`, `infer-schema`).
 

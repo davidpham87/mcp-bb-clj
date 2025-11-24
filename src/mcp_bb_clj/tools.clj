@@ -6,7 +6,9 @@
             [portal.api :as p]
             [cljfmt.core :as cljfmt]
             [zprint.core :as zprint]
-            [rewrite-clj.parser :as parser]))
+            [rewrite-clj.parser :as parser]
+            [babashka.process :as process]
+            [babashka.json :as json]))
 
 (def start-repl-tool
   {:name "start-repl"
@@ -157,4 +159,30 @@
                        {:content [{:type "text" :text "No malformed delimiters found."}]}
                        (catch Exception e
                          {:content [{:type "text" :text (str "Malformed delimiters found: " (.getMessage e))}]
+                          :isError true})))})
+
+(def clj-kondo-tool
+  {:name "clj-kondo"
+   :description "Lints Clojure code using clj-kondo. Requires 'clj-kondo' executable in PATH."
+   :inputSchema {:type "object"
+                 :properties {"code" {:type "string"}}
+                 :required ["code"]}
+   :implementation (fn [{:keys [code]}]
+                     (try
+                       (let [result (process/process ["clj-kondo" "--lint" "-" "--config" "{:output {:format :json}}"]
+                                                     {:in code :out :string :err :string})
+                             out @result
+                             stdout (:out out)
+                             stderr (:err out)]
+                         (if (empty? stdout)
+                           {:content [{:type "text" :text (str "Error running clj-kondo: " stderr)}]
+                            :isError true}
+                           (let [parsed (json/read-str stdout {:key-fn keyword})]
+                             {:content [{:type "text" :text stdout}]
+                              :structured-content parsed})))
+                       (catch java.io.IOException e
+                         {:content [{:type "text" :text "clj-kondo executable not found in PATH."}]
+                          :isError true})
+                       (catch Exception e
+                         {:content [{:type "text" :text (str "Error running clj-kondo: " (.getMessage e))}]
                           :isError true})))})
