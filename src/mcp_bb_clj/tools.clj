@@ -3,7 +3,10 @@
             [clojure.edn :as edn]
             [mcp-bb-clj.prompts :as prompts]
             [babashka.nrepl.server :as nrepl-server]
-            [portal.api :as p]))
+            [portal.api :as p]
+            [cljfmt.core :as cljfmt]
+            [zprint.core :as zprint]
+            [rewrite-clj.parser :as parser]))
 
 (def start-repl-tool
   {:name "start-repl"
@@ -111,3 +114,47 @@
          {:content [{:type    "text"
                      :text    (str "Error evaluating code: " (.getMessage e))}]
           :isError true})))})
+
+(def cljfmt-tool
+  {:name "cljfmt"
+   :description "Formats Clojure code using cljfmt."
+   :inputSchema {:type "object"
+                 :properties {"code" {:type "string"}}
+                 :required ["code"]}
+   :implementation (fn [{:keys [code]}]
+                     (try
+                       (let [formatted (cljfmt/reformat-string code)]
+                         {:content [{:type "text" :text formatted}]})
+                       (catch Exception e
+                         {:content [{:type "text" :text (str "Error formatting code: " (.getMessage e))}]
+                          :isError true})))})
+
+(def zprint-tool
+  {:name "zprint"
+   :description "Formats Clojure code or EDN using zprint."
+   :inputSchema {:type "object"
+                 :properties {"code" {:type "string"}
+                              "options" {:type "string" :description "Optional zprint options as an EDN string."}}
+                 :required ["code"]}
+   :implementation (fn [{:keys [code options]}]
+                     (try
+                       (let [opts (if options (edn/read-string options) {})
+                             formatted (zprint/zprint-str code opts)]
+                         {:content [{:type "text" :text formatted}]})
+                       (catch Exception e
+                         {:content [{:type "text" :text (str "Error formatting code: " (.getMessage e))}]
+                          :isError true})))})
+
+(def find-malformed-delimiters-tool
+  {:name "find-malformed-delimiters"
+   :description "Checks Clojure code for malformed delimiters (unbalanced parentheses, brackets, braces)."
+   :inputSchema {:type "object"
+                 :properties {"code" {:type "string"}}
+                 :required ["code"]}
+   :implementation (fn [{:keys [code]}]
+                     (try
+                       (parser/parse-string-all code)
+                       {:content [{:type "text" :text "No malformed delimiters found."}]}
+                       (catch Exception e
+                         {:content [{:type "text" :text (str "Malformed delimiters found: " (.getMessage e))}]
+                          :isError true})))})

@@ -50,6 +50,9 @@
                           {:tools [echo-tool
                                    malli-tools/validate-schema-tool
                                    malli-tools/generate-sample-tool
-                                   malli-tools/infer-schema-tool]})
+                                   malli-tools/infer-schema-tool
+                                   tools/cljfmt-tool
+                                   tools/zprint-tool
+                                   tools/find-malformed-delimiters-tool]})
     (server/run-server (app mcp-server) {:port port})
     (println (str "server running at http://127.0.0.1:" port))))
