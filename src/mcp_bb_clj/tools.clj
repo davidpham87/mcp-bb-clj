@@ -7,8 +7,8 @@
             [cljfmt.core :as cljfmt]
             [zprint.core :as zprint]
             [rewrite-clj.parser :as parser]
-            [babashka.process :as process]
-            [babashka.json :as json]))
+            [babashka.json :as json]
+            [clj-kondo.core :as clj-kondo]))
 
 (def start-repl-tool
   {:name "start-repl"
@@ -163,26 +163,24 @@
 
 (def clj-kondo-tool
   {:name "clj-kondo"
-   :description "Lints Clojure code using clj-kondo. Requires 'clj-kondo' executable in PATH."
+   :description "Lints Clojure code using clj-kondo library."
    :inputSchema {:type "object"
                  :properties {"code" {:type "string"}}
                  :required ["code"]}
    :implementation (fn [{:keys [code]}]
-                     (try
-                       (let [result (process/process ["clj-kondo" "--lint" "-" "--config" "{:output {:format :json}}"]
-                                                     {:in code :out :string :err :string})
-                             out @result
-                             stdout (:out out)
-                             stderr (:err out)]
-                         (if (empty? stdout)
-                           {:content [{:type "text" :text (str "Error running clj-kondo: " stderr)}]
-                            :isError true}
-                           (let [parsed (json/read-str stdout {:key-fn keyword})]
-                             {:content [{:type "text" :text stdout}]
-                              :structured-content parsed})))
-                       (catch java.io.IOException e
-                         {:content [{:type "text" :text "clj-kondo executable not found in PATH."}]
-                          :isError true})
-                       (catch Exception e
-                         {:content [{:type "text" :text (str "Error running clj-kondo: " (.getMessage e))}]
-                          :isError true})))})
+                     (let [tmp-file (java.io.File/createTempFile "clj-kondo-" ".clj")]
+                       (try
+                         (spit tmp-file code)
+                         (let [result (clj-kondo/run! {:lint [(.getAbsolutePath tmp-file)]
+                                                       :config {:output {:format :edn}}})
+                               ;; Sanitize filename in findings to be more generic
+                               cleaned-result (update result :findings
+                                                      (fn [findings]
+                                                        (mapv #(assoc % :filename "input") findings)))]
+                           {:content [{:type "text" :text (json/write-str cleaned-result)}]
+                            :structured-content cleaned-result})
+                         (catch Exception e
+                           {:content [{:type "text" :text (str "Error running clj-kondo: " (.getMessage e))}]
+                            :isError true})
+                         (finally
+                           (.delete tmp-file)))))})
