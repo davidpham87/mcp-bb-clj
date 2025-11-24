@@ -45,7 +45,7 @@
                (fn [text]
                  (reduce-kv
                    (fn [t k v]
-                     (str/replace t (str "{{" (name k) "}}") v))
+                     (str/replace t (str "{{" (name k) "}}") (str v)))
                    text
                    arguments)))
     message))
